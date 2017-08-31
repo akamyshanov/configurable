@@ -8,6 +8,7 @@
     <Description>Configuration utilities for .NET</Description>
     <PackageProjectUrl>https://github.com/akamyshanov/configurable</PackageProjectUrl>
     <PackageTags>Configuration JSON</PackageTags>
+    <PackageIconUrl>https://github.com/akamyshanov/configurable/raw/master/Resources/icon.png</PackageIconUrl>
   </PropertyGroup>
 
   <ItemGroup>
