@@ -28,14 +28,25 @@ namespace Sandbox
         private static void Main(string[] args)
         {
             var path = args.FirstOrDefault() ?? "config.json";
+
+            // Craete a reader for the specified path
             var reader = ConfigurationReader.Default<MyConfiguration>(path);
+
+            // Listen for all sorts of errors
             reader.Error += ex => Console.Error.WriteLine(ex);
 
-            reader.Updated += Log;
+            // Listen for changes
+            var token = reader.OnChanges(Log);
+
+            // Read configuration
             var configuration = reader.Read();
+
             Log(configuration);
 
             Console.ReadKey(true);
+
+            // Stop listening for changes
+            token.Dispose();
         }
 
         private static void Log(MyConfiguration myConfiguration)

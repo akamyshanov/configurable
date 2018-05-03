@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
+using Configurable.Util;
 
 namespace Configurable.TextSources
 {
@@ -9,14 +10,17 @@ namespace Configurable.TextSources
         public string Path { get; }
         public string FullPath { get; }
 
-        public event Action<string> Updated;
         public event Action<Exception> Error;
 
-        private readonly FileSystemWatcher _watcher;
-        private readonly Timer _updatedTimer;
+
         private string _cache;
 
-        public FileTextSource(string path, bool watch = true)
+        private int _watcherInitFlag;
+        private Timer _updatedTimer;
+        private FileSystemWatcher _watcher;
+        private event Action<string> Updated;
+
+        public FileTextSource(string path)
         {
             if (String.IsNullOrWhiteSpace(path))
             {
@@ -25,11 +29,6 @@ namespace Configurable.TextSources
 
             Path = path;
             FullPath = System.IO.Path.GetFullPath(path);
-            if (watch)
-            {
-                _watcher = CreateWatcher();
-                _updatedTimer = new Timer(FireChanged, null, Timeout.Infinite, Timeout.Infinite);
-            }
         }
 
         public bool Exists => File.Exists(Path);
@@ -56,10 +55,30 @@ namespace Configurable.TextSources
             File.WriteAllText(FullPath, text);
         }
 
+        public IDisposable OnChange(Action<string> handler)
+        {
+            InitializeWatcher();
+            Updated += handler;
+            return new OnDisposeAction(() => Updated -= handler);
+        }
+
         public void Dispose()
         {
             _watcher?.Dispose();
             _updatedTimer?.Dispose();
+        }
+
+        private void InitializeWatcher()
+        {
+            const int @true = 1;
+            var flag = Interlocked.Exchange(ref _watcherInitFlag, @true);
+            if (flag == @true)
+            {
+                return;
+            }
+
+            _updatedTimer = new Timer(FireChanged);
+            _watcher = CreateWatcher();
         }
 
         private FileSystemWatcher CreateWatcher()

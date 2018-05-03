@@ -6,7 +6,6 @@ namespace Configurable
 {
     public interface IConfigurationReader<out T>
     {
-        event Action<T> Updated;
         event Action<Exception> Error;
 
         ITextSource TextSource { get; }
@@ -14,5 +13,6 @@ namespace Configurable
         T Read();
         T GetDefault();
         T ReadFromSource();
+        IDisposable OnChanges(Action<T> handler);
     }
 }
