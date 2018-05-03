@@ -6,7 +6,7 @@ Configuration utilities for .NET
 
 ## Usage
 
-```
+```C#
 using System;
 using System.Linq;
 using Configurable;
