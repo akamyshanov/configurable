@@ -7,14 +7,19 @@ install:
 
 before_build:
 - cmd: gitversion /l console /output buildserver
-- cmd: nuget restore
+
+build_script:
 - cmd: dotnet build  -c Release /p:Version=%GitVersion_FullSemVer% /p:PackageVersion=%GitVersion_NuGetVersion%
+
+artifacts:
+- path: '**\*.nupkg'
+  name: nupkg
 
 deploy:
   provider: NuGet
   api_key:
     secure: dXqr4tDaQmyI/pELVztsegQdf/v2AyuVUbgMdfwlxFPPLkTR/xof90yq/rvgzlFZ
   skip_symbols: false
-  artifact: /.*\.nupkg/
+  artifact: 'nupkg'
   on:
     appveyor_repo_tag: true
